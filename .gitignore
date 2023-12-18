@@ -1,0 +1,5 @@
+build/
+managed_components/
+.devcontainer/
+sdkconfig
+sdkconfig.old
