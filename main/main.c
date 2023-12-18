@@ -1,20 +1,30 @@
-#include <stdio.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
-#include "esp_system.h"
 #include "esp_wifi.h"
-#include "esp_event.h"
 #include "nvs_flash.h"
-#include "lwip/err.h"
-#include "lwip/sys.h"
-#include "esp_netif.h"
-#include "esp_http_client.h"
 
-#include "esp_peripherals.h"
+#include "esp_http_client.h"
+#include "sdkconfig.h"
+#include "audio_element.h"
 #include "audio_pipeline.h"
+#include "audio_event_iface.h"
+#include "audio_common.h"
+#include "board.h"
+#include "http_stream.h"
 #include "i2s_stream.h"
+#include "wav_encoder.h"
+#include "esp_peripherals.h"
+#include "periph_button.h"
+#include "periph_wifi.h"
+#include "filter_resample.h"
+#include "input_key_service.h"
+#include "audio_idf_version.h"
+
+#include "esp_netif.h"
+
+#define DEMO_EXIT_BIT (BIT0)
 
 #define CONFIG_SERVER_URI "http://gappu-nextjs.vercel.app/api/google/translate"
 
@@ -31,7 +41,7 @@ static esp_periph_handle_t button_handle;
 static audio_pipeline_handle_t pipeline;
 static audio_element_handle_t http_stream_writer, i2s_stream_reader;
 
-static audio_event_iface_handle_t evt_listener;
+static EventGroupHandle_t EXIT_FLAG;
 
 /*--------------------------------- Static Functions ---------------------------------*/
 // HTTP Stream Event Handler
@@ -93,6 +103,45 @@ static esp_err_t _http_stream_event_handle(http_stream_event_msg_t *msg)
     return ESP_OK;
 }
 
+static esp_err_t input_key_service_cb(periph_service_handle_t handle, periph_service_event_t *evt, void *ctx)
+{
+    audio_element_handle_t http_stream_writer = (audio_element_handle_t)ctx;
+    if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK) {
+        switch ((int)evt->data) {
+            case INPUT_KEY_USER_ID_MODE:
+                ESP_LOGW(TAG, "[ * ] [Set] input key event, exit the demo ...");
+                xEventGroupSetBits(EXIT_FLAG, DEMO_EXIT_BIT);
+                break;
+            case INPUT_KEY_USER_ID_REC:
+                ESP_LOGE(TAG, "[ * ] [Rec] input key event, resuming pipeline ...");
+                /*
+                 * There is no effect when follow APIs output warning message on the first time record
+                 */
+                audio_pipeline_stop(pipeline);
+                audio_pipeline_wait_for_stop(pipeline);
+                audio_pipeline_reset_ringbuffer(pipeline);
+                audio_pipeline_reset_elements(pipeline);
+                audio_pipeline_terminate(pipeline);
+
+                audio_element_set_uri(http_stream_writer, CONFIG_SERVER_URI);
+                audio_pipeline_run(pipeline);
+                break;
+        }
+    } else if (evt->type == INPUT_KEY_SERVICE_ACTION_CLICK_RELEASE || evt->type == INPUT_KEY_SERVICE_ACTION_PRESS_RELEASE) {
+        switch ((int)evt->data) {
+            case INPUT_KEY_USER_ID_REC:
+                ESP_LOGE(TAG, "[ * ] [Rec] key released, stop pipeline ...");
+                /*
+                 * Set the i2s_stream_reader ringbuffer is done to flush the buffering voice data.
+                 */
+                audio_element_set_ringbuf_done(i2s_stream_reader);
+                break;
+        }
+    }
+
+    return ESP_OK;
+}
+
 // Initialize WiFi and GPIO button
 static void board_peripheral_init(){
 
@@ -107,13 +156,6 @@ static void board_peripheral_init(){
     };
     wifi_handle = periph_wifi_init(&wifi_cfg);
     esp_periph_start(periph_set, wifi_handle);
-
-    // Initializ Input GPIO Button 
-    periph_button_cfg_t btn_cfg = {
-        .gpio_mask = GPIO_SEL_36 | GPIO_SEL_36, //REC BTN
-    };
-    button_handle = periph_button_init(&btn_cfg);
-    esp_periph_start(periph_set, button_handle);
     periph_wifi_wait_for_connected(wifi_handle, portMAX_DELAY);
 
     return;
@@ -137,7 +179,8 @@ static void i2s_in_stream_init(){
     ESP_LOGI(TAG, "[3.2] Create i2s stream to read audio data from codec chip");
     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
     i2s_cfg.type = AUDIO_STREAM_READER;
-    i2s_cfg.i2s_port = 1;
+    i2s_cfg.out_rb_size = 16 * 1024; // Increase buffer to avoid missing data in bad network conditions
+    i2s_cfg.i2s_port = CODEC_ADC_I2S_PORT;
     i2s_stream_reader = i2s_stream_init(&i2s_cfg);
 }
 
@@ -162,7 +205,7 @@ static void evt_listener_init(){
 
 static void start_adf_pipeline(){
     nvs_flash_init();
-    tcpip_adapter_init();
+    ESP_ERROR_CHECK(esp_netif_init());
 
     board_peripheral_init();
     board_codec_init();
@@ -174,73 +217,23 @@ static void start_adf_pipeline(){
     // Define audio pipeline
     audio_pipeline_register(pipeline, i2s_stream_reader, "i2s");
     audio_pipeline_register(pipeline, http_stream_writer, "http");
-    audio_pipeline_link(pipeline, (const char *[]) {"i2s", "http"}, 2);
-    
-    // Configure I2S input stream
+    const char *link_tag[2] = {"i2s", "http"};
+    audio_pipeline_link(pipeline, &link_tag[0], 2);
+
     i2s_stream_set_clk(i2s_stream_reader, 16000, 16, 2);
+
+    ESP_LOGI(TAG, "[ 4 ] Press [Rec] button to record, Press [Mode] to exit");
+    xEventGroupWaitBits(EXIT_FLAG, DEMO_EXIT_BIT, true, false, portMAX_DELAY);    
 }
 
 static void end_adf_pipeline(){
-    audio_pipeline_terminate(pipeline);
 
-    audio_pipeline_unregister(pipeline, http_stream_writer);
-    audio_pipeline_unregister(pipeline, i2s_stream_reader);
-
-    /* Terminate the pipeline before removing the listener */
-    audio_pipeline_remove_listener(pipeline);
-
-    /* Stop all periph before removing the listener */
-    esp_periph_set_stop_all(periph_set);
-    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(periph_set), evt_listener);
-
-    /* Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface */
-    audio_event_iface_destroy(evt_listener);
-
-    /* Release all resources */
-    audio_pipeline_deinit(pipeline);
-    audio_element_deinit(http_stream_writer);
-    audio_element_deinit(i2s_stream_reader);
-    esp_periph_set_destroy(periph_set);
 }
 
 /*--------------------------------- Main ---------------------------------*/
 
-static void app_main()
+void app_main(void)
 {
-    start_adf_pipeline();
 
-    // Listen for pipeline events
-    while (1) {
-        audio_event_iface_msg_t msg;
-        esp_err_t ret = audio_event_iface_listen(evt_listener, &msg, portMAX_DELAY);
-
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "[ * ] Event interface error : %d", ret);
-            continue;
-        }
-
-        if (msg.source_type != PERIPH_ID_BUTTON) {
-            continue;
-        }
-
-        // It's not REC button
-        if ((int)msg.data != GPIO_NUM_36) {
-            continue;
-        }
-
-        if (msg.cmd == PERIPH_BUTTON_PRESSED) {
-            ESP_LOGI(TAG, "start recording...");
-            audio_element_set_uri(http_stream_writer, CONFIG_SERVER_URI);
-            audio_pipeline_run(pipeline);
-        } else if (msg.cmd == PERIPH_BUTTON_RELEASE || msg.cmd == PERIPH_BUTTON_LONG_RELEASE) {
-            ESP_LOGI(TAG, "stop recording");
-            audio_pipeline_stop(pipeline);
-            audio_pipeline_wait_for_stop(pipeline);
-            audio_pipeline_terminate(pipeline);
-        }
-
-    }
-
-    end_adf_pipeline();
 }
 

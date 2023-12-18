@@ -21,7 +21,9 @@
         "esp_http_client.h": "c",
         "esp_netif.h": "c",
         "i2s_stream.h": "c",
-        "sys.h": "c"
+        "sys.h": "c",
+        "bitset": "c",
+        "set": "c"
     },
     "idf.flashType": "UART",
     "idf.port": "/dev/ttyUSB0"
