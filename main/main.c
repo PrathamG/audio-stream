@@ -160,7 +160,7 @@ static void evt_listener_init(){
     audio_event_iface_set_listener(esp_periph_set_get_event_iface(periph_set), evt_listener); 
 }
 
-static start_adf_pipeline(){
+static void start_adf_pipeline(){
     nvs_flash_init();
     tcpip_adapter_init();
 
@@ -191,10 +191,10 @@ static void end_adf_pipeline(){
 
     /* Stop all periph before removing the listener */
     esp_periph_set_stop_all(periph_set);
-    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(periph_set), evt);
+    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(periph_set), evt_listener);
 
     /* Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface */
-    audio_event_iface_destroy(evt);
+    audio_event_iface_destroy(evt_listener);
 
     /* Release all resources */
     audio_pipeline_deinit(pipeline);
