@@ -1,4 +1,7 @@
 build/
 managed_components/
 .devcontainer/
+.vscode/
 sdkconfig.old
+sdkconfig
+
