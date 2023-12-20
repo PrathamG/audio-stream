@@ -31,9 +31,8 @@
 #define GOOGLE_SR_ENCODING "LINEAR16"
 #define SAMPLE_RATE_HZ (16000)
 
-#define GOOGLE_SR_CONFIG           "{\"languageCode\": \"%s\", \"encoding\": \"%s\", \"sampleRateHertz\": %d}"
-#define GOOGLE_SR_BEGIN            "{\"config\": " GOOGLE_SR_CONFIG ", \"audio\": {\"content\":\""
-#define GOOGLE_SR_END              "\"}}"
+#define GOOGLE_SR_BEGIN            "{\"language\": \"%s\", \"encoding\": \"%s\", \"sampleRateHertz\": %d, \"speech\": \""
+#define GOOGLE_SR_END              "\"}"
 
 #define GOOGLE_SR_TASK_STACK (8*1024)
 
