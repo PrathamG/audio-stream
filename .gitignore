@@ -1,7 +1,10 @@
-build/
-managed_components/
-.devcontainer/
-.vscode/
-sdkconfig.old
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# production
+/build
+/.vscode
 sdkconfig
-
+sdkconfig.*
+Kconfig.projbuild
+.env*
+.env.*
+.env
