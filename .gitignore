@@ -2,8 +2,10 @@
 # production
 /build
 /.vscode
+/managed_components
 sdkconfig
 sdkconfig.*
+dependencies.lock
 Kconfig.projbuild
 .env*
 .env.*
