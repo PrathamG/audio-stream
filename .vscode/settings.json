@@ -1,30 +1,22 @@
 {
-    "C_Cpp.intelliSenseEngine": "default",
-    "idf.adapterTargetName": "esp32",
-   
-    "idf.espIdfPath": "/home/hansonrobotics/esp/frameworks/esp-idf-v5.1",
-    "idf.espAdfPath": "/home/hansonrobotics/esp/frameworks/esp-adf",
-    "idf.toolsPath": "/home/hansonrobotics/esp/frameworks/esp-tools-v5.1",
-    "idf.pythonBinPath": "/home/hansonrobotics/esp/frameworks/esp-tools-v5.1/python_env/idf5.1_py3.8_env/bin/python",
-    "idf.customExtraPaths": "/home/hansonrobotics/esp/frameworks/esp-tools-v5.1/tools/xtensa-esp32-elf/esp-12.2.0_20230208/xtensa-esp32-elf/bin:/home/hansonrobotics/esp/frameworks/esp-tools-v5.1/tools/riscv32-esp-elf/esp-12.2.0_20230208/riscv32-esp-elf/bin:/home/hansonrobotics/esp/frameworks/esp-tools-v5.1/tools/openocd-esp32/v0.12.0-esp32-20230419/openocd-esp32/bin:",
-
-    "idf.gitPath": "/usr/bin/git",
-
-    "idf.customExtraVars": {
-        "OPENOCD_SCRIPTS": "/home/hansonrobotics/esp/frameworks/esp-tools-v5.1/tools/openocd-esp32/v0.12.0-esp32-20230419/openocd-esp32/share/openocd/scripts"
-    },
-    "idf.openOcdConfigs": [
-        "board/esp32-wrover-kit-3.3v.cfg"
-    ],
-    "files.associations": {
-        "esp_peripherals.h": "c",
-        "esp_http_client.h": "c",
-        "esp_netif.h": "c",
-        "i2s_stream.h": "c",
-        "sys.h": "c",
-        "bitset": "c",
-        "set": "c"
-    },
     "idf.flashType": "UART",
-    "idf.port": "/dev/ttyUSB0"
+    "idf.port": "/dev/ttyUSB0",
+    "idf.adapterTargetName": "esp32",
+    "files.associations": {
+        "board.h": "c",
+        "audio_idf_version.h": "c",
+        "google_translate.h": "c",
+        "bitset": "c",
+        "set": "c",
+        "google_sr.h": "c",
+        "audio_common.h": "c",
+        "esp_peripherals.h": "c",
+        "periph_wifi.h": "c",
+        "esp_http_client.h": "c",
+        "socket.h": "c",
+        "sockets.h": "c",
+        "sdkconfig.h": "c",
+        "periph_adc_button.h": "c",
+        "audio_event_iface.h": "c"
+    }
 }
