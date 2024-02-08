@@ -58,11 +58,11 @@ typedef struct google_tts {
     audio_element_handle_t  i2s_writer;
     audio_element_handle_t  http_stream_reader;
     audio_element_handle_t  mp3_decoder;
-    char*                   api_key;
-    char*                   lang_code;
+    char                    *api_key;
+    char                    *lang_code;
     int                     buffer_size;
-    char*                   buffer;
-    char*                   text;
+    char                    *buffer;
+    char                    *text;
     bool                    is_begin;
     int                     tts_total_read;
     int                     sample_rate;
@@ -149,10 +149,10 @@ static esp_err_t _http_stream_reader_event_handle(http_stream_event_msg_t *msg)
     return ESP_OK;
 }
 
-google_tts_handle_t google_tts_init(google_tts_config_t* config)
+google_tts_handle_t google_tts_init(google_tts_config_t *config)
 {
     audio_pipeline_cfg_t pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
-    google_tts_t* tts = calloc(1, sizeof(google_tts_t));
+    google_tts_t *tts = calloc(1, sizeof(google_tts_t));
     AUDIO_MEM_CHECK(TAG, tts, return NULL);
 
     tts->pipeline = audio_pipeline_init(&pipeline_cfg);
@@ -171,10 +171,7 @@ google_tts_handle_t google_tts_init(google_tts_config_t* config)
     tts->sample_rate = config->playback_sample_rate;
 
     i2s_stream_cfg_t i2s_cfg = I2S_STREAM_CFG_DEFAULT();
-    i2s_cfg.i2s_port = 0;
     i2s_cfg.type = AUDIO_STREAM_WRITER;
-    i2s_cfg.i2s_config.sample_rate = tts->sample_rate;
-    //i2s_cfg.i2s_config.channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT;
     tts->i2s_writer = i2s_stream_init(&i2s_cfg);
 
     http_stream_cfg_t http_cfg = {
@@ -191,13 +188,12 @@ google_tts_handle_t google_tts_init(google_tts_config_t* config)
     audio_pipeline_register(tts->pipeline, tts->http_stream_reader, "tts_http");
     audio_pipeline_register(tts->pipeline, tts->mp3_decoder,        "tts_mp3");
     audio_pipeline_register(tts->pipeline, tts->i2s_writer,         "tts_i2s");
-    const char* link_tag[3] = {"tts_http", "tts_mp3", "tts_i2s"};
+    const char *link_tag[3] = {"tts_http", "tts_mp3", "tts_i2s"};
     audio_pipeline_link(tts->pipeline, &link_tag[0], 3);
     i2s_stream_set_clk(tts->i2s_writer, config->playback_sample_rate, 16, 1);
     return tts;
 exit_tts_init:
     google_tts_destroy(tts);
-    ESP_LOGE(TAG, "TTS Error: Exiting");
     return NULL;
 }
 
@@ -263,6 +259,6 @@ esp_err_t google_tts_stop(google_tts_handle_t tts)
 {
     audio_pipeline_stop(tts->pipeline);
     audio_pipeline_wait_for_stop(tts->pipeline);
-    ESP_LOGI(TAG, "TTS Stopped");
+    ESP_LOGD(TAG, "TTS Stopped");
     return ESP_OK;
 }

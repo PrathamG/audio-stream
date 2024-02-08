@@ -88,6 +88,7 @@ static void google_tts_init_start(){
         .playback_sample_rate = RECORD_PLAYBACK_SAMPLE_RATE,
     };
     tts = google_tts_init(&tts_config);
+    ESP_LOGI(TAG, "HTTP->I2S TTS Audio pipeline initialized");
 }
 
 static void audio_event_listener_setup_start(){
@@ -121,12 +122,7 @@ void event_process_Task(void *pv)
             continue;
         }
         
-        //ESP_LOGI(TAG, "[ * ] Event received: src_type:%d, source:%p cmd:%d, data:%p, data_len:%d", msg.source_type, msg.source, msg.cmd, msg.data, msg.data_len);
-        /*
-        if ((int)msg.data != get_input_rec_id() && (int)msg.data != get_input_mode_id()) {
-            ESP_LOGI(TAG, "[ * ] Pressed button %d was not record or mode, skip event", (int)msg.data);
-            continue;
-        }*/
+        ESP_LOGI(TAG, "[ * ] Event received: src_type:%d, source:%p cmd:%d, data:%p, data_len:%d", msg.source_type, msg.source, msg.cmd, msg.data, msg.data_len);
 
         if ((msg.source_type == PERIPH_ID_TOUCH || msg.source_type == PERIPH_ID_BUTTON || msg.source_type == PERIPH_ID_ADC_BTN)) {
             if((int)msg.data == get_input_rec_id()) {
@@ -143,7 +139,7 @@ void event_process_Task(void *pv)
                         continue;
                     }
                     ESP_LOGI(TAG, "response text = %s", response_text);
-                    vTaskDelay(500 / portTICK_PERIOD_MS);
+                    vTaskDelay(2000 / portTICK_PERIOD_MS);
                     ESP_LOGI(TAG, "TTS Start");
                     google_tts_start(tts, response_text, GOOGLE_TTS_LANG);   
                 } 
