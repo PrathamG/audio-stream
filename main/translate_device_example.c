@@ -28,7 +28,7 @@ static const char *TAG = "CLOUD_API_TEST";
 
 #define CONFIG_WIFI_SSID "JaisNet2"
 #define CONFIG_WIFI_PASSWORD "heyheygaga"
-#define CONFIG_GOOGLE_API_KEY "AIzaSyCQOpKCdMXEgh2s2knShSFk9RMl3HNzcZo"
+#define CONFIG_GOOGLE_API_KEY ""
 
 static esp_periph_set_handle_t periph_set;
 static google_sr_handle_t sr;
