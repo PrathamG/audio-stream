@@ -213,7 +213,7 @@ static esp_err_t _http_stream_writer_event_handle(http_stream_event_msg_t* msg)
             read_len = sr->buffer_size - 1;
         }
         sr->buffer[read_len] = 0;
-        //ESP_LOGI(TAG, "Got HTTP Response = %s", (char*)sr->buffer);
+        // ESP_LOGI(TAG, "Got HTTP Response = %s", (char*)sr->buffer);
         if (sr->response_text) {
             free(sr->response_text);
         }

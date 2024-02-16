@@ -26,6 +26,10 @@ static const char *TAG = "CLOUD_API_TEST";
 #define GOOGLE_TTS_LANG "en-US"                 //https://cloud.google.com/text-to-speech/docs/voices
 #define RECORD_PLAYBACK_SAMPLE_RATE (16000) 
 
+#define CONFIG_WIFI_SSID "JaisNet2"
+#define CONFIG_WIFI_PASSWORD "heyheygaga"
+#define CONFIG_GOOGLE_API_KEY "AIzaSyCQOpKCdMXEgh2s2knShSFk9RMl3HNzcZo"
+
 static esp_periph_set_handle_t periph_set;
 static google_sr_handle_t sr;
 static google_tts_handle_t tts;
@@ -141,7 +145,7 @@ void event_process_Task(void *pv)
                     ESP_LOGI(TAG, "response text = %s", response_text);
                     vTaskDelay(2000 / portTICK_PERIOD_MS);
                     ESP_LOGI(TAG, "TTS Start");
-                    google_tts_start(tts, response_text, GOOGLE_TTS_LANG);   
+                    // google_tts_start(tts, response_text, GOOGLE_TTS_LANG);   
                 } 
                 else if ((int)msg.data == get_input_mode_id()) {
                     ESP_LOGI(TAG, "Mode button was pressed, exit now");

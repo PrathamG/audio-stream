@@ -1,6 +1,6 @@
 {
     "idf.flashType": "UART",
-    "idf.port": "/dev/ttyUSB0",
+    "idf.port": "/dev/cu.usbserial-110",
     "idf.adapterTargetName": "esp32",
     "files.associations": {
         "board.h": "c",
@@ -18,5 +18,11 @@
         "sdkconfig.h": "c",
         "periph_adc_button.h": "c",
         "audio_event_iface.h": "c"
-    }
+    },
+    "idf.espAdfPath": "/Users/gappu/esp/esp-adf",
+    "idf.espAdfPathWin": "/Users/gappu/esp/esp-adf",
+    "idf.espIdfPath": "/Users/gappu/esp/esp-idf",
+    "idf.espIdfPathWin": "/Users/gappu/esp/esp-idf",
+    "idf.pythonBinPath": "/Users/gappu/.espressif/python_env/idf5.0_py3.9_env/bin/python",
+    "idf.customExtraPaths": "/Users/gappu/.espressif/tools/xtensa-esp-elf-gdb/11.2_20220823/xtensa-esp-elf-gdb/bin:/Users/gappu/.espressif/tools/riscv32-esp-elf-gdb/11.2_20220823/riscv32-esp-elf-gdb/bin:/Users/gappu/.espressif/tools/xtensa-esp32-elf/esp-2022r1-11.2.0/xtensa-esp32-elf/bin:/Users/gappu/.espressif/tools/xtensa-esp32s2-elf/esp-2022r1-11.2.0/xtensa-esp32s2-elf/bin:/Users/gappu/.espressif/tools/xtensa-esp32s3-elf/esp-2022r1-11.2.0/xtensa-esp32s3-elf/bin:/Users/gappu/.espressif/tools/riscv32-esp-elf/esp-2022r1-11.2.0/riscv32-esp-elf/bin:/Users/gappu/.espressif/tools/esp32ulp-elf/2.35_20220830/esp32ulp-elf/bin:/Users/gappu/.espressif/tools/cmake/3.24.0/CMake.app/Contents/bin:/Users/gappu/.espressif/tools/openocd-esp32/v0.11.0-esp32-20221026/openocd-esp32/bin:/Users/gappu/.espressif/tools/ninja/1.10.2"
 }
