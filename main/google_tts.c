@@ -45,7 +45,8 @@
 
 static const char *TAG = "GOOGLE_TTS";
 
-#define GOOGLE_TTS_ENDPOINT         "https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=%s"
+// #define GOOGLE_TTS_ENDPOINT         "https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=%s"
+#define GOOGLE_TTS_ENDPOINT         "https://texttospeech.googleapis.com/v1/text:synthesize?key=%s"
 #define GOOGLE_TTS_TEMPLATE         "{"\
                                         "\"audioConfig\": { \"audioEncoding\" : \"MP3\", \"sampleRateHertz\": %d },"\
                                         "\"voice\": { \"languageCode\" : \"%s\" },"\
@@ -81,10 +82,15 @@ static esp_err_t _http_stream_reader_event_handle(http_stream_event_msg_t *msg)
         ESP_LOGI(TAG, "[ + ] HTTP client HTTP_STREAM_PRE_REQUEST, lenght=%d", msg->buffer_len);
         tts->tts_total_read = 0;
         tts->is_begin = true;
-        int payload_len = snprintf(tts->buffer, tts->buffer_size, GOOGLE_TTS_TEMPLATE, tts->sample_rate, tts->lang_code, tts->text);
+        // int payload_len = snprintf(tts->buffer, tts->buffer_size, GOOGLE_TTS_TEMPLATE, tts->sample_rate, tts->lang_code, tts->text);
+        
+        int payload_len = snprintf(tts->buffer, tts->buffer_size, GOOGLE_TTS_TEMPLATE, tts->sample_rate, "en-US", "Hello my name is Jon, what is your name?");
         esp_http_client_set_post_field(http, tts->buffer, payload_len);
         esp_http_client_set_method(http, HTTP_METHOD_POST);
         esp_http_client_set_header(http, "Content-Type", "application/json");
+        ESP_LOGI(TAG,"----------------------------------------------------------------");
+        ESP_LOGI(TAG,"Buffer %s length %d sample rate %d",tts->buffer, tts->buffer_size,tts->sample_rate);
+        ESP_LOGI(TAG,"----------------------------------------------------------------");
         tts->remain_len = 0;
         return ESP_OK;
     }
@@ -247,7 +253,12 @@ esp_err_t google_tts_start(google_tts_handle_t tts, const char *text, const char
         ESP_LOGE(TAG, "Error no mem");
         return ESP_ERR_NO_MEM;
     }
-    snprintf(tts->buffer, tts->buffer_size, GOOGLE_TTS_ENDPOINT, tts->api_key);
+    // snprintf(tts->buffer, tts->buffer_size, GOOGLE_TTS_ENDPOINT, tts->api_key);
+    snprintf(tts->buffer, tts->buffer_size, GOOGLE_TTS_ENDPOINT, "AIzaSyCsZtNkkA4ND2n9aidkoGQw0S2H-VC8aGs");
+    ESP_LOGI(TAG,"----------------------------------------------------------------");
+    ESP_LOGI(TAG,"GOOGLE_TTS_ENDPOINT %s %d %s",tts->buffer, tts->buffer_size, tts->api_key);
+    ESP_LOGI(TAG,"----------------------------------------------------------------");
+
     audio_pipeline_reset_items_state(tts->pipeline);
     audio_pipeline_reset_ringbuffer(tts->pipeline);
     audio_element_set_uri(tts->http_stream_reader, tts->buffer);

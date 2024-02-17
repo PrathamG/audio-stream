@@ -28,7 +28,7 @@ static const char *TAG = "CLOUD_API_TEST";
 
 #define CONFIG_WIFI_SSID "JaisNet2"
 #define CONFIG_WIFI_PASSWORD "heyheygaga"
-#define CONFIG_GOOGLE_API_KEY ""
+#define CONFIG_GOOGLE_API_KEY "AIzaSyCsZtNkkA4ND2n9aidkoGQw0S2H-VC8aGs"
 
 static esp_periph_set_handle_t periph_set;
 static google_sr_handle_t sr;
@@ -111,61 +111,64 @@ static void audio_event_listener_setup_start(){
 }
 
 void event_process_Task(void *pv)
-{       
-    audio_event_iface_msg_t msg;
+{     
+        ESP_LOGI(TAG, "[ * ] In the event process tast");
+        google_tts_start(tts, "response_text", GOOGLE_TTS_LANG);   
 
-    while (1) {
-        if(audio_event_iface_listen(evt_listener, &msg, portMAX_DELAY) != ESP_OK) {
-            ESP_LOGE(TAG, "[ * ] Event process failed: src_type:%d, source:%p cmd:%d, data:%p, data_len:%d",
-                     msg.source_type, msg.source, msg.cmd, msg.data, msg.data_len);
-            continue;
-        }
+    // audio_event_iface_msg_t msg;
 
-        if(google_tts_check_event_finish(tts, &msg)) {
-            ESP_LOGI(TAG, "[ * ] TTS Finish");
-            continue;
-        }
+    // while (1) {
+    //     if(audio_event_iface_listen(evt_listener, &msg, portMAX_DELAY) != ESP_OK) {
+    //         ESP_LOGE(TAG, "[ * ] Event process failed: src_type:%d, source:%p cmd:%d, data:%p, data_len:%d",
+    //                  msg.source_type, msg.source, msg.cmd, msg.data, msg.data_len);
+    //         continue;
+    //     }
+
+    //     if(google_tts_check_event_finish(tts, &msg)) {
+    //         ESP_LOGI(TAG, "[ * ] TTS Finish");
+    //         continue;
+    //     }
         
-        ESP_LOGI(TAG, "[ * ] Event received: src_type:%d, source:%p cmd:%d, data:%p, data_len:%d", msg.source_type, msg.source, msg.cmd, msg.data, msg.data_len);
+    //     ESP_LOGI(TAG, "[ * ] Event received: src_type:%d, source:%p cmd:%d, data:%p, data_len:%d", msg.source_type, msg.source, msg.cmd, msg.data, msg.data_len);
 
-        if ((msg.source_type == PERIPH_ID_TOUCH || msg.source_type == PERIPH_ID_BUTTON || msg.source_type == PERIPH_ID_ADC_BTN)) {
-            if((int)msg.data == get_input_rec_id()) {
-                if(msg.cmd == PERIPH_BUTTON_PRESSED) {
-                    google_tts_stop(tts);
-                    ESP_LOGI(TAG, "[ * ] Resuming SR pipeline");
-                    google_sr_start(sr);
-                } 
-                else if(msg.cmd == PERIPH_BUTTON_RELEASE || msg.cmd == PERIPH_BUTTON_LONG_RELEASE){
-                    ESP_LOGI(TAG, "[ * ] Stop SR pipeline");
+    //     if ((msg.source_type == PERIPH_ID_TOUCH || msg.source_type == PERIPH_ID_BUTTON || msg.source_type == PERIPH_ID_ADC_BTN)) {
+    //         if((int)msg.data == get_input_rec_id()) {
+    //             if(msg.cmd == PERIPH_BUTTON_PRESSED) {
+    //                 // google_tts_stop(tts);
+    //                 // ESP_LOGI(TAG, "[ * ] Resuming SR pipeline");
+    //                 // google_sr_start(sr);
+    //             } 
+    //             else if(msg.cmd == PERIPH_BUTTON_RELEASE || msg.cmd == PERIPH_BUTTON_LONG_RELEASE){
+    //                 ESP_LOGI(TAG, "[ * ] Stop SR pipeline");
 
-                    char* response_text = google_sr_stop(sr);
-                    if (response_text == NULL) {
-                        continue;
-                    }
-                    ESP_LOGI(TAG, "response text = %s", response_text);
-                    vTaskDelay(2000 / portTICK_PERIOD_MS);
-                    ESP_LOGI(TAG, "TTS Start");
-                    // google_tts_start(tts, response_text, GOOGLE_TTS_LANG);   
-                } 
-                else if ((int)msg.data == get_input_mode_id()) {
-                    ESP_LOGI(TAG, "Mode button was pressed, exit now");
-                    break;
-                }
-            }
-        }
-    }
+    //                 // char* response_text = google_sr_stop(sr);
+    //                 // if (response_text == NULL) {
+    //                 //     continue;
+    //                 // }
+    //                 // ESP_LOGI(TAG, "response text = %s", response_text);
+    //                 // vTaskDelay(2000 / portTICK_PERIOD_MS);
+    //                 // ESP_LOGI(TAG, "TTS Start");
+    //                 google_tts_start(tts, "response_text", GOOGLE_TTS_LANG);   
+    //             } 
+    //             else if ((int)msg.data == get_input_mode_id()) {
+    //                 ESP_LOGI(TAG, "Mode button was pressed, exit now");
+    //                 break;
+    //             }
+    //         }
+    //     }
+    // }
 
-    ESP_LOGI(TAG, "[ 6 ] Stop audio_pipeline");
-    google_sr_destroy(sr);
-    google_tts_destroy(tts);
-    // Stop all periph before removing the listener 
-    esp_periph_set_stop_all(periph_set);
-    audio_event_iface_remove_listener(esp_periph_set_get_event_iface(periph_set), evt_listener);
+    // ESP_LOGI(TAG, "[ 6 ] Stop audio_pipeline");
+    // google_sr_destroy(sr);
+    // google_tts_destroy(tts);
+    // // Stop all periph before removing the listener 
+    // esp_periph_set_stop_all(periph_set);
+    // audio_event_iface_remove_listener(esp_periph_set_get_event_iface(periph_set), evt_listener);
 
-    // Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface
-    audio_event_iface_destroy(evt_listener);
-    esp_periph_set_destroy(periph_set);
-    vTaskDelete(NULL);
+    // // Make sure audio_pipeline_remove_listener & audio_event_iface_remove_listener are called before destroying event_iface
+    // audio_event_iface_destroy(evt_listener);
+    // esp_periph_set_destroy(periph_set);
+    // vTaskDelete(NULL);
 }
 
 void app_main(void)
@@ -182,9 +185,12 @@ void app_main(void)
     audio_board_codec_init_start();                     //Initialize audio board and codec
     audio_board_peripherals_setup(periph_set);          //Initialize audio board peripherals
     wifi_init_start();                                  //Start wifi
-    google_sr_init_start();                             //Initialize (i2s_read)->(http_write) audio pipeline for sr
+    // google_sr_init_start();                             //Initialize (i2s_read)->(http_write) audio pipeline for sr
     google_tts_init_start();                            //Initialize (http_write)->(mp3_decoder)->(i2s_write) audio pipeline for tts
-    audio_event_listener_setup_start();                 //Init audio event listener and connect it to pipelines + peripherals
+    // audio_event_listener_setup_start();                 //Init audio event listener and connect it to pipelines + peripherals
 
-    xTaskCreate(event_process_Task, "event_process", 4 * 4096, NULL, 5, 0);  
+    ESP_LOGI(TAG, "[ * ] In the event process tast");
+    google_tts_start(tts, "response_text", GOOGLE_TTS_LANG);   
+
+    // xTaskCreate(event_process_Task, "event_process", 4 * 4096, NULL, 5, 0);  
 }

@@ -6,11 +6,17 @@ git describe --tags
 
 git checkout v5.0
 
-Update the ESP-IDF extension to use version installed on the syste,
+update the library
+
+git submodule update --init --recursive
+
+
+Update the ESP-IDF extension to use version installed on the system,
 
 Update the path of ESP-IDF and ADF in extension settings for user's path
 
 Update the extension workspace paths same as user's path including Idf: Python Bin Path
+/Users/ashokjaiswal/.espressif/python_env/idf5.0_py3.10_env/bin/python
 
 if there is error of libcoexist.a then update git submodule update --init --recursive
 
